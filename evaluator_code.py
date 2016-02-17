@@ -16,6 +16,7 @@ In case of any queries, please post on moodle.iiit.ac.in
 import sys
 import random
 import signal
+from team56 import Player56
 
 def handler(signum, frame):
     #print 'Signal handler called with signal', signum
@@ -33,19 +34,6 @@ class ManualPlayer:
 		
 
 
-class Player1:
-	
-	def __init__(self):
-		# You may initialize your object here and use any variables for storing throughout the game
-		pass
-
-	def move(self,temp_board,temp_block,old_move,flag):
-		#List of permitted blocks, based on old move.
-		blocks_allowed  = determine_blocks_allowed(old_move, temp_block)
-		#Get list of empty valid cells
-		cells = get_empty_out_of(temp_board, blocks_allowed)
-		#Choose a move based on some algorithm, here it is a random move.
-		return cells[random.randrange(len(cells))]
 
 class Player2:
 	
@@ -379,11 +367,11 @@ if __name__ == '__main__':
 	obj2 = ''
 	option = sys.argv[1]	
 	if option == '1':
-		obj1 = Player1()
+		obj1 = Player56()
 		obj2 = Player2()
 
 	elif option == '2':
-		obj1 = Player1()
+		obj1 = Player56()
 		obj2 = ManualPlayer()
 	elif option == '3':
 		obj1 = ManualPlayer()
@@ -397,5 +385,3 @@ if __name__ == '__main__':
 		simulate(obj2, obj1)
 	else:
 		simulate(obj1, obj2)
-		
-	
