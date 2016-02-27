@@ -4,7 +4,7 @@ import random
 import signal
 from copy import deepcopy
 
-class Player56:
+class Player13:
     def __init__(self):
         self.totalmoves=0
         self.first_move = [(5,5),(5,3),(3,3),(3,5)]
@@ -161,13 +161,8 @@ class Player56:
         heuristic = -100
 
 
-        if self.totalmoves ==1 and player_no==1:
+        if self.totalmoves ==1:
             return self.first_move[random.randrange(len(self.first_move))]
-        
-        elif self.totalmoves ==1 and player_no==2:
-            for each_cell in cells:
-                if each_cell in corner_cells:
-                    return each_cell
         
         if level == 1: 
             heuristic_dict = {}
@@ -225,11 +220,10 @@ class Player56:
                 final_heuristic = temp_heuristic - next_heuristic
 
             if level < self.ply:
-                if level ==1:    
-                    if final_heuristic not in heuristic_dict.keys():
-                        heuristic_dict[final_heuristic] = [each_cell]
-                    else:
-                        heuristic_dict[final_heuristic].append(each_cell)
+                if final_heuristic not in heuristic_dict.keys():
+                    heuristic_dict[final_heuristic] = [each_cell]
+                else:
+                    heuristic_dict[final_heuristic].append(each_cell)
 
                 if final_heuristic > heuristic:
                     heuristic = final_heuristic 
@@ -244,6 +238,10 @@ class Player56:
             return final_list[random.randrange(len(final_list))]
         else:
             return heuristic
+            
+
+            # else:
+                # return cells[random.randrange(len(cells))]
 
 
     def move(self,temp_board,temp_block,old_move,flag):

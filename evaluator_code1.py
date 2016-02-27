@@ -17,6 +17,7 @@ import sys
 import random
 import signal
 from team56 import Player56
+from testbot import Player13
 
 def handler(signum, frame):
     #print 'Signal handler called with signal', signum
@@ -34,6 +35,19 @@ class ManualPlayer:
 		
 
 
+class Player1:
+	
+	def __init__(self):
+		# You may initialize your object here and use any variables for storing throughout the game
+		pass
+
+	def move(self,temp_board,temp_block,old_move,flag):
+		#List of permitted blocks, based on old move.
+		blocks_allowed  = determine_blocks_allowed(old_move, temp_block)
+		#Get list of empty valid cells
+		cells = get_empty_out_of(temp_board, blocks_allowed,temp_block)
+		#Choose a move based on some algorithm, here it is a random move.
+		return cells[random.randrange(len(cells))]
 
 class Player2:
 	
@@ -149,10 +163,8 @@ def check_valid_move(game_board, block_stat, current_move, old_move):
 
 	#List of permitted blocks, based on old move.
 	blocks_allowed  = determine_blocks_allowed(old_move, block_stat)
-	print blocks_allowed
 	# We get all the empty cells in allowed blocks. If they're all full, we get all the empty cells in the entire board.
-	cells = get_empty_out_of(game_board, blocks_allowed,block_stat)
-	print cells
+	cells = get_empty_out_of(game_board, blocks_allowed, block_stat)
 	#Checks if you made a valid move. 
 	if current_move in cells:
 		return True
@@ -167,21 +179,31 @@ def update_lists(game_board, block_stat, move_ret, fl):
 	id1 = block_no/3
 	id2 = block_no%3
 	mflg = 0
+
+	flag = 0
+	for i in range(id1*3,id1*3+3):
+		for j in range(id2*3,id2*3+3):
+			if game_board[i][j] == '-':
+				flag = 1
+
+
 	if block_stat[block_no] == '-':
-		if game_board[id1*3][id2*3] == game_board[id1*3+1][id2*3+1] and game_board[id1*3+1][id2*3+1] == game_board[id1*3+2][id2*3+2] and game_board[id1*3+1][id2*3+1] != '-':
+		if game_board[id1*3][id2*3] == game_board[id1*3+1][id2*3+1] and game_board[id1*3+1][id2*3+1] == game_board[id1*3+2][id2*3+2] and game_board[id1*3+1][id2*3+1] != '-' and game_board[id1*3+1][id2*3+1] != 'D':
 			mflg=1
-		if game_board[id1*3+2][id2*3] == game_board[id1*3+1][id2*3+1] and game_board[id1*3+1][id2*3+1] == game_board[id1*3][id2*3 + 2] and game_board[id1*3+1][id2*3+1] != '-':
+		if game_board[id1*3+2][id2*3] == game_board[id1*3+1][id2*3+1] and game_board[id1*3+1][id2*3+1] == game_board[id1*3][id2*3 + 2] and game_board[id1*3+1][id2*3+1] != '-' and game_board[id1*3+1][id2*3+1] != 'D':
 			mflg=1
 		if mflg != 1:
                     for i in range(id2*3,id2*3+3):
-                        if game_board[id1*3][i]==game_board[id1*3+1][i] and game_board[id1*3+1][i] == game_board[id1*3+2][i] and game_board[id1*3][i] != '-':
+                        if game_board[id1*3][i]==game_board[id1*3+1][i] and game_board[id1*3+1][i] == game_board[id1*3+2][i] and game_board[id1*3][i] != '-' and game_board[id1*3][i] != 'D':
                                 mflg = 1
                                 break
 		if mflg != 1:
                     for i in range(id1*3,id1*3+3):
-                        if game_board[i][id2*3]==game_board[i][id2*3+1] and game_board[i][id2*3+1] == game_board[i][id2*3+2] and game_board[i][id2*3] != '-':
+                        if game_board[i][id2*3]==game_board[i][id2*3+1] and game_board[i][id2*3+1] == game_board[i][id2*3+2] and game_board[i][id2*3] != '-' and game_board[i][id2*3] != 'D':
                                 mflg = 1
                                 break
+	if flag == 0:
+		block_stat[block_no] = 'D'
 	if mflg == 1:
 		block_stat[block_no] = fl
 	
@@ -192,21 +214,20 @@ def terminal_state_reached(game_board, block_stat,point1,point2):
 	### we are now concerned only with block_stat
 	bs = block_stat
 	## Row win
-	if (bs[0] == bs[1] and bs[1] == bs[2] and bs[1]!='-') or (bs[3]!='-' and bs[3] == bs[4] and bs[4] == bs[5]) or (bs[6]!='-' and bs[6] == bs[7] and bs[7] == bs[8]):
+	if (bs[0] == bs[1] and bs[1] == bs[2] and bs[1]!='-' and bs[1]!='D') or (bs[3]!='-' and bs[3]!='D' and bs[3] == bs[4] and bs[4] == bs[5]) or (bs[6]!='D' and bs[6]!='-' and bs[6] == bs[7] and bs[7] == bs[8]):
 		return True, 'W'
 	## Col win
-	elif (bs[0] == bs[3] and bs[3] == bs[6] and bs[0]!='-') or (bs[1] == bs[4] and bs[4] == bs[7] and bs[4]!='-') or (bs[2] == bs[5] and bs[5] == bs[8] and bs[5]!='-'):
+	elif (bs[0] == bs[3] and bs[3] == bs[6] and bs[0]!='-' and bs[0]!='D') or (bs[1] == bs[4] and bs[4] == bs[7] and bs[4]!='-' and bs[4]!='D') or (bs[2] == bs[5] and bs[5] == bs[8] and bs[5]!='-' and bs[5]!='D'):
 		return True, 'W'
 	## Diag win
-	elif (bs[0] == bs[4] and bs[4] == bs[7] and bs[0]!='-') or (bs[2] == bs[4] and bs[4] == bs[6] and bs[2]!='-'):
+	elif (bs[0] == bs[4] and bs[4] == bs[8] and bs[0]!='-' and bs[0]!='D') or (bs[2] == bs[4] and bs[4] == bs[6] and bs[2]!='-' and bs[2]!='D'):
 		return True, 'W'
 	else:
 		smfl = 0
 		for i in range(9):
-			for j in range(9):
-				if game_board[i][j] == '-':
-					smfl = 1
-					break
+			if block_stat[i] == '-':
+				smfl = 1
+				break
 		if smfl == 1:
 			return False, 'Continue'
 		
@@ -274,7 +295,7 @@ def simulate(obj1,obj2):
 
 	WINNER = ''
 	MESSAGE = ''
-	TIMEALLOWED = 12000
+	TIMEALLOWED = 12
 	p1_pts=0
 	p2_pts=0
 
@@ -287,13 +308,14 @@ def simulate(obj1,obj2):
 	
 		signal.signal(signal.SIGALRM, handler)
 		signal.alarm(TIMEALLOWED)
+		ret_move_pl1 = pl1.move(temp_board_state, temp_block_stat, old_move, pl1_fl)
 
-		try:
-			ret_move_pl1 = pl1.move(temp_board_state, temp_block_stat, old_move, pl1_fl)
-		except:
-			WINNER, MESSAGE = decide_winner_and_get_message('P1', 'L',   'TIMED OUT')
-			print MESSAGE
-			break
+#		try:
+#			ret_move_pl1 = pl1.move(temp_board_state, temp_block_stat, old_move, pl1_fl)
+#		except:
+#			WINNER, MESSAGE = decide_winner_and_get_message('P1', 'L',   'TIMED OUT')
+#			print MESSAGE
+#			break
 		signal.alarm(0)
 	
 		# Check if list is tampered.
@@ -326,6 +348,7 @@ def simulate(obj1,obj2):
 
         	signal.signal(signal.SIGALRM, handler)
         	signal.alarm(TIMEALLOWED)
+
         	try:
            		ret_move_pl2 = pl2.move(temp_board_state, temp_block_stat, old_move, pl2_fl)
         	except:
@@ -355,6 +378,7 @@ def simulate(obj1,obj2):
 			old_move = ret_move_pl2
 			print_lists(game_board, block_stat)
 	
+	print MESSAGE	
 	return WINNER
 
 if __name__ == '__main__':
@@ -375,7 +399,7 @@ if __name__ == '__main__':
 		obj2 = Player2()
 
 	elif option == '2':
-		obj1 = Player56()
+		obj1 = Player1()
 		obj2 = ManualPlayer()
 	elif option == '3':
 		obj1 = ManualPlayer()
@@ -386,17 +410,23 @@ if __name__ == '__main__':
 
 	num = random.uniform(0,1)
 	# if num > 0.5:
-		# print "player56 is player 2"
-		# simulate(obj2, obj1)
+	# simulate(obj2, obj1)
 	# else:
-	winner = []
-	count =0
-	for x in xrange(0,1):
-		print "player56 is player 1"
-		winner.append(simulate(obj1, obj2))
+	# simulate(obj1, obj2)
 	
-	for x in xrange(0,1):
+	winner = []
+	count1 =0
+	count2 = 0
+	for x in xrange(0,100):
+		print "player56 is player 2"
+		winner.append(simulate(obj2, obj1))
+	
+	for x in xrange(0,100):
 		print winner[x]
 		if winner[x] == "P1":
-			count = count + 1
-	print count
+			count1 = count1 + 1
+		if winner[x] == "P2":
+			count2 = count2 + 1
+
+	print "P1 won: " ,count1		
+	print "P2 won: " ,count2
