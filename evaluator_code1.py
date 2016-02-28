@@ -18,6 +18,8 @@ import random
 import signal
 from team56 import Player56
 from testbot import Player13
+from team79 import Player79
+from ai import IntelligentPlayer
 
 def handler(signum, frame):
     #print 'Signal handler called with signal', signum
@@ -378,8 +380,8 @@ def simulate(obj1,obj2):
 			old_move = ret_move_pl2
 			print_lists(game_board, block_stat)
 	
-	print MESSAGE	
-	return WINNER
+		
+	return WINNER, MESSAGE
 
 if __name__ == '__main__':
 	## get game playing objects
@@ -396,7 +398,8 @@ if __name__ == '__main__':
 	option = sys.argv[1]	
 	if option == '1':
 		obj1 = Player56()
-		obj2 = Player2()
+		obj2 = Player79()
+		# obj2 = IntelligentPlayer()
 
 	elif option == '2':
 		obj1 = Player1()
@@ -415,14 +418,18 @@ if __name__ == '__main__':
 	# simulate(obj1, obj2)
 	
 	winner = []
+	message = []
 	count1 =0
 	count2 = 0
-	for x in xrange(0,100):
+	for x in xrange(0,1):
 		print "player56 is player 2"
-		winner.append(simulate(obj2, obj1))
-	
-	for x in xrange(0,100):
-		print winner[x]
+		win , mess = simulate(obj2, obj1)
+		winner.append(win)
+		message.append(mess)
+
+	for x in xrange(0,1):
+		print winner[x],
+		print message[x]
 		if winner[x] == "P1":
 			count1 = count1 + 1
 		if winner[x] == "P2":

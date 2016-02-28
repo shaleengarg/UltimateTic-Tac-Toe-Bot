@@ -8,7 +8,8 @@ class Player56:
     def __init__(self):
         self.totalmoves=0
         self.first_move = [(5,5),(5,3),(3,3),(3,5)]
-        self.ply = 2
+        self.ply = 4
+        self.max_child = 0
         pass
 
     def determine_blocks_allowedd(self,old_move, block_stat):
@@ -136,7 +137,62 @@ class Player56:
         blocks_allowed  = self.determine_blocks_allowedd(old_move, temp_block)
         return blocks_allowed
 
-    def AI(self,temp_board, blocks_allowed, temp_block,player_no,level):
+    def check_board_win(self,temp_board,temp_block,cell,flag_player):
+        
+        if self.checkwin(temp_board,cell,flag_player):
+            x = cell[0]
+            y = cell[1]
+
+            idb = self.give_block_no(x,y)
+
+            if flag_player == 1:
+                if temp_block[idb] == '-' or temp_block[idb] == 'x':
+                    temp_block[idb] = 'x'
+            else:
+                if temp_block[idb] == '-' or temp_block[idb] == 'o':
+                    temp_block[idb] = 'o'
+
+            if temp_block[0] == 'x' and temp_block[1] == 'x' and temp_block[2] == 'x':
+                return True
+            if temp_block[0] == 'o' and temp_block[1] == 'o' and temp_block[2] == 'o':
+                return True
+            
+            if temp_block[3] == 'x' and temp_block[4] == 'x' and temp_block[5] == 'x':
+                return True
+            if temp_block[3] == 'o' and temp_block[4] == 'o' and temp_block[5] == 'o':
+                return True
+            
+            if temp_block[6] == 'x' and temp_block[7] == 'x' and temp_block[8] == 'x':
+                return True
+            if temp_block[6] == 'o' and temp_block[7] == 'o' and temp_block[8] == 'o':
+                return True
+            
+            if temp_block[0] == 'x' and temp_block[3] == 'x' and temp_block[6] == 'x':
+                return True
+            if temp_block[0] == 'o' and temp_block[3] == 'o' and temp_block[6] == 'o':
+                return True
+
+            if temp_block[1] == 'x' and temp_block[4] == 'x' and temp_block[7] == 'x':
+                return True
+            if temp_block[1] == 'o' and temp_block[4] == 'o' and temp_block[7] == 'o':
+                return True
+            
+            if temp_block[2] == 'x' and temp_block[5] == 'x' and temp_block[8] == 'x':
+                return True
+            if temp_block[2] == 'o' and temp_block[5] == 'o' and temp_block[8] == 'o':
+                return True
+            
+            if temp_block[0] == 'x' and temp_block[4] == 'x' and temp_block[8] == 'x':
+                return True
+            if temp_block[0] == 'o' and temp_block[4] == 'o' and temp_block[8] == 'o':
+                return True
+            
+            if temp_block[2] == 'x' and temp_block[4] == 'x' and temp_block[6] == 'x':
+                return True
+            if temp_block[2] == 'o' and temp_block[4] == 'o' and temp_block[6] == 'o':
+                return True
+
+    def AI(self,temp_board, blocks_allowed, temp_block,player_no,level,alpha,beta):
 
         if level > self.ply:
             return
@@ -174,28 +230,58 @@ class Player56:
             if len(cells) == 1: #if only one block is free
                 return cells[0]
 
-        for each_cell in cells: 
+
+        self.max_child = self.max_child + len(cells)
+
+        if self.max_child < 6000:
+            self.ply = 6
+
+        elif self.max_child > 6000 and level < 5:
+            self.ply =4
+        # if self.totalmoves > 24:
+            # self.ply = 6
+
+        # if self.totalmoves > 18:
+            # self.ply = 8
+
+        for each_cell in cells: # Min-Max
             another_board = deepcopy(temp_board)   
             another_block = deepcopy(temp_block)
+            temp_player_no = player_no
 
-            if self.checkwin(another_board,each_cell,player_no):
-                    temp_heuristic = 60
-            else: 
+            if temp_player_no == 1:
+                temp_player_no = 2
+            else:
+                temp_player_no = 1
+
+            if self.totalmoves > 8 and  self.check_board_win(another_board,another_block,each_cell,player_no):
+                temp_heuristic = 100
+                if level == 1:
+                    return each_cell
+            
+            elif self.totalmoves > 8 and  self.check_board_win(another_board,another_block,each_cell,temp_player_no):
+                temp_heuristic = 90
+            
+            else:        
                 another_board = deepcopy(temp_board)
-                if player_no == 1:
-                    player_no = 2
-                else:
-                    player_no = 1
-                # Opponent Blocking
                 if self.checkwin(another_board,each_cell,player_no):
-                    temp_heuristic = 40
-                else:
-                    if each_cell in center_cells:
-                        temp_heuristic = 5
-                    if each_cell in corner_cells:
-                        temp_heuristic = 15
-                    if each_cell not in center_cells and each_cell not in corner_cells:
-                        temp_heuristic = 10
+                        temp_heuristic = 60
+                else: 
+                    another_board = deepcopy(temp_board)
+                    if player_no == 1:
+                        player_no = 2
+                    else:
+                        player_no = 1
+                    # Opponent Blocking
+                    if self.checkwin(another_board,each_cell,player_no):
+                        temp_heuristic = 40
+                    else:
+                        if each_cell in center_cells:
+                            temp_heuristic = 5
+                        if each_cell in corner_cells:
+                            temp_heuristic = 15
+                        if each_cell not in center_cells and each_cell not in corner_cells:
+                            temp_heuristic = 10
 
             if level < self.ply:
                 another_board = deepcopy(temp_board)
@@ -220,9 +306,18 @@ class Player56:
                     next_player=1
                     another_board[each_cell[0]][each_cell[1]] = 'o'
                 
-                next_heuristic = self.AI(another_board, next_blocks_allowed, another_block, next_player,level+1)
-
+                next_heuristic = self.AI(another_board, next_blocks_allowed, another_block, next_player,level+1,alpha,beta)
                 final_heuristic = temp_heuristic - next_heuristic
+                
+                #Alpha-Beta Pruning
+                if next_heuristic > alpha and level%2==1:
+                    alpha = next_heuristic
+                
+                elif next_heuristic < beta and level%2==0:
+                    beta = next_heuristic
+            
+            if alpha > beta: #Alpha-Beta Pruning
+                break
 
             if level < self.ply:
                 if level ==1:    
@@ -250,12 +345,53 @@ class Player56:
         self.totalmoves = self.totalmoves+1
         blocks_allowed  = self.determine_blocks_allowedd(old_move, temp_block)
         
-        
+        print "Number of children " , self.max_child
         print self.totalmoves
+        self.max_child = 0
 
         if flag == 'x':
             player_no = 1
         else:
             player_no =  2
         
-        return self.AI(temp_board,blocks_allowed,temp_block,player_no,1)
+        return self.AI(temp_board,blocks_allowed,temp_block,player_no,1,-99999999,99999999)
+
+
+"""
+Player 2 made the move: (8, 1) with o
+=========== Game Board ===========
+- - -  x - -  - - -
+o - o  - - -  - - o
+- - x  x - o  - x -
+
+o - -  - - -  - - o
+- - -  - - -  - - -
+- - o  x x -  - - x
+    #
+- x -  - o -  - x -
+- - o  - - -  - o x
+- o -  - o x  - x -#
+==================================
+=========== Block Status =========
+- - -
+- - -
+- - -
+==================================
+
+13
+Player 1 made the move: (8, 8) with x
+=========== Game Board ===========
+- - -  x - -  - - -
+o - o  - - -  - - o
+- - x  x - o  - x -
+
+o - -  - - -  - - o
+- - -  - - -  - - -
+- - o  x x -  - - x
+
+- x -  - o -  - x -
+- - o  - - -  - o x
+- o -  - o x  - x x
+==================================
+=========== Block Status =========
+"""
